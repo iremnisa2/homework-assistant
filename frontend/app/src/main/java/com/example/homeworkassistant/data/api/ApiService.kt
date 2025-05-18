@@ -15,14 +15,18 @@ interface ApiService {
     suspend fun register(@Body registerRequest: RegisterRequest): Response<AuthResponse>
     
     // Homework endpoints
-    @GET("homework")
-    suspend fun getHomeworkList(): Response<HomeworkListResponse>
+    @GET("assignments")
+    suspend fun getHomeworkList(
+        @Query("status") status: String? = null,
+        @Query("deadline") deadlineFilter: String? = null,
+        @Query("search") searchTerm: String? = null
+    ): Response<HomeworkListResponse>
     
-    @GET("homework/{id}")
+    @GET("assignments/{id}")
     suspend fun getHomeworkById(@Path("id") homeworkId: String): Response<HomeworkResponse>
     
     @Multipart
-    @POST("homework")
+    @POST("assignments")
     suspend fun uploadHomework(
         @Part("title") title: RequestBody,
         @Part("description") description: RequestBody,
@@ -30,7 +34,19 @@ interface ApiService {
         @Part file: MultipartBody.Part
     ): Response<HomeworkResponse>
     
-    @DELETE("homework/{id}")
+    @GET("assignments/{id}/file")
+    suspend fun downloadHomeworkFile(@Path("id") homeworkId: String): Response<okhttp3.ResponseBody>
+    
+    @PUT("assignments/{id}")
+    suspend fun updateHomework(
+        @Path("id") homeworkId: String,
+        @Body updateRequest: HomeworkUpdateRequest
+    ): Response<HomeworkResponse>
+    
+    @PUT("assignments/{id}/submit")
+    suspend fun submitHomework(@Path("id") homeworkId: String): Response<HomeworkResponse>
+    
+    @DELETE("assignments/{id}")
     suspend fun deleteHomework(@Path("id") homeworkId: String): Response<ApiResponse>
     
     // Profile endpoints

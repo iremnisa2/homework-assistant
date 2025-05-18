@@ -10,6 +10,8 @@ import com.example.homeworkassistant.data.repository.AuthRepository
 import com.example.homeworkassistant.data.repository.HomeworkRepository
 import com.example.homeworkassistant.utils.Resource
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.InputStream
 
 class HomeworkViewModel(application: Application) : AndroidViewModel(application) {
     
@@ -26,13 +28,22 @@ class HomeworkViewModel(application: Application) : AndroidViewModel(application
     private val _uploadResult = MutableLiveData<Resource<Homework>>()
     val uploadResult: LiveData<Resource<Homework>> = _uploadResult
     
+    private val _updateResult = MutableLiveData<Resource<Homework>>()
+    val updateResult: LiveData<Resource<Homework>> = _updateResult
+    
+    private val _submitResult = MutableLiveData<Resource<Homework>>()
+    val submitResult: LiveData<Resource<Homework>> = _submitResult
+    
+    private val _downloadResult = MutableLiveData<Resource<InputStream>>()
+    val downloadResult: LiveData<Resource<InputStream>> = _downloadResult
+    
     private val _deleteResult = MutableLiveData<Resource<Boolean>>()
     val deleteResult: LiveData<Resource<Boolean>> = _deleteResult
     
     // Get list of homework assignments
-    fun getHomeworkList() {
+    fun getHomeworkList(status: String? = null, deadlineFilter: String? = null, searchTerm: String? = null) {
         viewModelScope.launch {
-            homeworkRepository.getHomeworkList().collect { result ->
+            homeworkRepository.getHomeworkList(status, deadlineFilter, searchTerm).collect { result ->
                 _homeworkList.value = result
             }
         }
@@ -48,10 +59,37 @@ class HomeworkViewModel(application: Application) : AndroidViewModel(application
     }
     
     // Upload a new homework assignment
-    fun uploadHomework(title: String, description: String, deadline: String, file: java.io.File) {
+    fun uploadHomework(title: String, description: String, deadline: String, file: File) {
         viewModelScope.launch {
             homeworkRepository.uploadHomework(title, description, deadline, file).collect { result ->
                 _uploadResult.value = result
+            }
+        }
+    }
+    
+    // Update homework details
+    fun updateHomework(homeworkId: String, title: String?, description: String?, deadline: String?) {
+        viewModelScope.launch {
+            homeworkRepository.updateHomework(homeworkId, title, description, deadline).collect { result ->
+                _updateResult.value = result
+            }
+        }
+    }
+    
+    // Submit homework
+    fun submitHomework(homeworkId: String) {
+        viewModelScope.launch {
+            homeworkRepository.submitHomework(homeworkId).collect { result ->
+                _submitResult.value = result
+            }
+        }
+    }
+    
+    // Download homework file
+    fun downloadHomeworkFile(homeworkId: String) {
+        viewModelScope.launch {
+            homeworkRepository.downloadHomeworkFile(homeworkId).collect { result ->
+                _downloadResult.value = result
             }
         }
     }
